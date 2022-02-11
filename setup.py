@@ -3,11 +3,11 @@
 from setuptools import setup
 
 setup(
-    name='tap-appsflyer',
+    name='singer-tap-appsflyer',
     version='0.0.13',
     description='Singer.io tap for extracting data from the AppsFlyer API',
-    author='Stitch, Inc.',
-    url='http://singer.io',
+    author='Stitch, Inc. & Izzudin Hafiz',
+    url='https://github.com/izzudinhafiz/tap-appsflyer',
     classifiers=['Programming Language :: Python :: 3 :: Only'],
     py_modules=['tap_appsflyer'],
     install_requires=[
