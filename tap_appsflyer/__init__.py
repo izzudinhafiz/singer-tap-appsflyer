@@ -183,7 +183,13 @@ class RequestToCsvAdapter:
 def sync_installs():
 
     schema = load_schema("raw_data/installations")
-    singer.write_schema("installs", schema, [
+    stream_name = "installs"
+    if CONFIG.get("table_prefix"):
+        stream_name = f"{CONFIG.get('table_prefix')}_{stream_name}"
+    if CONFIG.get("schema_prefix"):
+        stream_name = f"{CONFIG.get('schema_prefix')}-{stream_name}"
+
+    singer.write_schema(stream_name, schema, [
         "event_time",
         "event_name",
         "appsflyer_id"
@@ -297,7 +303,7 @@ def sync_installs():
     bookmark = from_datetime
     for i, row in enumerate(reader):
         record = xform(row, schema)
-        singer.write_record("installs", record)
+        singer.write_record(stream_name, record)
         # AppsFlyer returns records in order of most recent first.
         try:
             if utils.strptime(record["attributed_touch_time"]) > bookmark:
@@ -306,13 +312,19 @@ def sync_installs():
             LOGGER.error("failed to get attributed_touch_time")
 
     # Write out state
-    utils.update_state(STATE, "installs", bookmark)
+    utils.update_state(STATE, stream_name, bookmark)
     singer.write_state(STATE)
 
 def sync_organic_installs():
-    
+
     schema = load_schema("raw_data/organic_installs")
-    singer.write_schema("organic_installs", schema, [
+    stream_name = "organic_installs"
+    if CONFIG.get("table_prefix"):
+        stream_name = f"{CONFIG.get('table_prefix')}_{stream_name}"
+
+    if CONFIG.get("schema_prefix"):
+        stream_name = f"{CONFIG.get('schema_prefix')}-{stream_name}"
+    singer.write_schema(stream_name, schema, [
         "event_time",
         "event_name",
         "appsflyer_id"
@@ -426,20 +438,25 @@ def sync_organic_installs():
     bookmark = from_datetime
     for i, row in enumerate(reader):
         record = xform(row, schema)
-        singer.write_record("organic_installs", record)
+        singer.write_record(stream_name, record)
         # AppsFlyer returns records in order of most recent first.
         if utils.strptime(record["event_time"]) > bookmark:
             bookmark = utils.strptime(record["event_time"])
 
     # Write out state
-    utils.update_state(STATE, "organic_installs", bookmark)
+    utils.update_state(STATE, stream_name, bookmark)
     singer.write_state(STATE)
 
 
 def sync_in_app_events():
 
     schema = load_schema("raw_data/in_app_events")
-    singer.write_schema("in_app_events", schema, [
+    stream_name = "in_app_events"
+    if CONFIG.get("table_prefix"):
+        stream_name = f"{CONFIG.get('table_prefix')}_{stream_name}"
+    if CONFIG.get("schema_prefix"):
+        stream_name = f"{CONFIG.get('schema_prefix')}-{stream_name}"
+    singer.write_schema(stream_name, schema, [
         "event_time",
         "event_name",
         "appsflyer_id"
@@ -552,13 +569,13 @@ def sync_in_app_events():
         bookmark = from_datetime
         for i, row in enumerate(reader):
             record = xform(row, schema)
-            singer.write_record("in_app_events", record)
+            singer.write_record(stream_name, record)
             # AppsFlyer returns records in order of most recent first.
             if utils.strptime(record["event_time"]) > bookmark:
                 bookmark = utils.strptime(record["event_time"])
 
         # Write out state
-        utils.update_state(STATE, "in_app_events", bookmark)
+        utils.update_state(STATE, stream_name, bookmark)
         singer.write_state(STATE)
 
         # Move the timings forward
